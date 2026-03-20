@@ -262,12 +262,13 @@
         z-index:200;
     " onclick="closeGeneModal()">
         <div onclick="event.stopPropagation()" style="
-            background:white;
-            width:680px;
-            margin:80px auto;
-            border-radius:12px;
-            overflow:hidden;
-            box-shadow:0 20px 60px rgba(0,0,0,0.3);
+            background: white;
+            width: 680px;
+            max-height: 85vh;
+            margin: 40px auto;
+            border-radius: 12px;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         ">
             <!-- 头部 -->
             <div style="
@@ -291,7 +292,7 @@
             <!-- 图表 -->
             <div style="padding:20px 24px;">
                 <img id="geneExprImg" src="Gene_expression.png"
-                    style="width:100%; height:auto; border-radius:6px;">
+                    style="width:100%; height:auto; max-height:65vh; object-fit:contain; border-radius:6px;">
             </div>
         </div>
     </div>
