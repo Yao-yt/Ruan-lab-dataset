@@ -1,0 +1,1293 @@
+<!DOCTYPE html>    
+<html>
+<head>
+    <meta charset = "UTF-8">
+    <title>website</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;      /* 字体 */
+            margin: 0;                          /* 去掉默认边距 */    
+            background: #fcfbfb;                 /* 背景色 */
+
+        }
+
+        /* 导航栏 */
+        nav {
+            background: white;
+            border-bottom: 2px solid #ddd;
+            padding: 0 20px ;
+            display: flex;       /* 横向排列 */
+            align-items:center;     /* 垂直居中 */
+        }
+
+        /* 导航按钮 */
+        .nav-btn {
+            padding: 15px 20px;
+            cursor: pointer;         /* 鼠标变成手型 */
+            color: #666;
+            border-bottom: 3px solid transparent;    /* 默认透明边框 */
+
+        }
+
+        /* 激活状态的按钮 */
+        .nav-btn.active {
+            color: #43a047;         
+            border-bottom-color: #43a047;
+            font-weight: bold;
+        }
+
+        /* 鼠标悬停效果 */
+        .nav-btn:hover {
+            background: #fcfbfb;
+
+        }
+    </style>
+
+     <!-- 引入 D3 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-btn active"> 主页</div>
+        <div class="nav-btn"> 斑马鱼</div>
+        <div class="nav-btn"> 小鼠</div>
+        <div class="nav-btn"> 爪蟾</div>
+    </nav>
+
+        <!-- 主页内容 -->
+    <div id="page-home" style="max-width: 860px; margin: 60px auto; padding: 0 40px;">
+        <h1 style="font-size: 2.2rem; color: #222; margin-bottom: 24px;">Ruan Lab Dataset</h1>
+        <p style="font-size: 1.05rem; line-height: 1.9; color: #444; margin-bottom: 16px;">
+            Research areas in our lab
+        </p>
+        <ul style="font-size: 1.05rem; line-height: 2; color: #444; padding-left: 24px;">
+            <li>Genome technology</li>
+            <li>Computational biology</li>
+            <li>3D genome biology and transcription regulation</li>
+            <li>Cancer genomics and structural variations</li>
+            <li>Chromatin topology and transcription regulation in immune cells</li>
+        </ul>
+    </div>
+
+    
+    <!-- 斑马鱼入口页面 -->
+    <div id="page-zebrafish" style="display:none; width:100%; min-height:calc(100vh - 52px); background:#f8f8f8;">
+
+        <div style="max-width:900px; margin:60px auto; padding:0 40px;">
+            <h2 style="font-size:1.8rem; color:#222; margin-bottom:8px;">Zebrafish</h2>
+            <p style="color:#888; font-size:1rem; margin-bottom:48px;">
+                Select a module to explore the dataset.
+            </p>
+
+            <div style="display:flex; gap:32px;">
+
+                <!-- Single Cell 卡片 -->
+                <div style="
+                    flex:1;
+                    background:white;
+                    border-radius:12px;
+                    overflow:hidden;
+                    box-shadow:0 2px 12px rgba(0,0,0,0.08);
+                ">
+                    <img src="singlecell_cover.png"
+                        style="width:100%; height:200px; object-fit:cover; display:block;">
+                    <div style="padding:20px 24px 24px;">
+                        <h3 style="margin:0 0 8px; font-size:1.1rem; color:#222;">Single Cell</h3>
+                        <p style="margin:0 0 20px; color:#888; font-size:0.9rem; line-height:1.6;">
+                            Explore cell type trajectories across developmental time points.
+                            Click on any node to view RNA-seq, ATAC-seq and PET results.
+                        </p>
+                        <button onclick="showPage('zebrafish-sc')" style="
+                            padding:10px 24px;
+                            background:#43a047;
+                            color:white;
+                            border:none;
+                            border-radius:6px;
+                            font-size:0.9rem;
+                            cursor:pointer;
+                        ">Explore →</button>
+                    </div>
+                </div>
+
+                <!-- Browser 卡片 -->
+                <div style="
+                    flex:1;
+                    background:white;
+                    border-radius:12px;
+                    overflow:hidden;
+                    box-shadow:0 2px 12px rgba(0,0,0,0.08);
+                ">
+                    <img src="browser_cover.png"
+                        style="width:100%; height:200px; object-fit:cover; display:block;">
+                    <div style="padding:20px 24px 24px;">
+                        <h3 style="margin:0 0 8px; font-size:1.1rem; color:#222;">Browser</h3>
+                        <p style="margin:0 0 20px; color:#888; font-size:0.9rem; line-height:1.6;">
+                            Browse genomic tracks and chromatin accessibility data
+                            across cell types and stages.
+                        </p>
+                        <button onclick="window.open('http://10.71.245.10:8989/browser/?b=eyJtYWluTGlzdCI6WyIzIiwiMTkiXSwiZXh0cmFOYXZMaXN0IjpbXSwidHJhY2tMaXN0Ijp7IjMiOnsiY29sb3IiOiIjRjAwMjEyIiwiQXV0b3NjYWxlIjoidHJ1ZSIsIkdyb3Vwc2NhbGUiOiIjRjVGNUY1IiwiWW1heCI6ODgsIlltaW4iOjB9LCIxOSI6eyJjb2xvciI6IiNGMDAyMTIiLCJBdXRvc2NhbGUiOiJ0cnVlIiwiR3JvdXBzY2FsZSI6IiNGNUY1RjUiLCJZbWF4IjoxOC4yMSwiWW1pbiI6MH0sIm1vZGUiOiJjbHVzdGVySW5kaXYiLCJnZW5lX3JlZ2lvbl9zYyI6IiIsInNob3dDZWxsTnVtYmVyIjo4MDAsImRvd25zYW1wbGVkQ2VsbE51bWJlciI6LTEsImdsb2JhbC1taW5GcmFnbWVudCI6MiwiZ2xvYmFsLW1heEZyYWdtZW50IjoxMDAwLCJsb2NhbC1taW5GcmFnbWVudCI6MiwibG9jYWwtbWF4RnJhZ21lbnQiOi0xLCJtb2RlTUJFRCI6ImNsdXN0ZXJJbmRpdiIsInJlZ2lvbk1CRUQiOiIiLCJjb2xvck1CRUQiOiJjb2xvcmJ5Q2x1c3RlciIsIm5jbGFzcyI6MjB9LCJnZW5vbWUiOiJtbTEwIiwiY2hyIjoiY2hyMSIsInN0YXJ0U2VsZSI6MjAwMDAwMDAsImVuZFNlbGUiOjI1MDAwMDAwfQ==', '_blank')" style="
+                            padding:10px 24px;
+                            background:#1565c0;
+                            color:white;
+                            border:none;
+                            border-radius:6px;
+                            font-size:0.9rem;
+                            cursor:pointer;
+                        ">Explore →</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- 斑马鱼 Single Cell 页面 -->
+    <div id="page-zebrafish-sc" style="display:none; width:100%; height:calc(100vh - 52px); background:#fff; overflow:hidden;">
+        <!-- 顶部工具栏 -->
+        <div style="padding:8px 20px; border-bottom:1px solid #eee; background:white;
+                    display:flex; align-items:center; justify-content:space-between;">
+            <button onclick="showPage('zebrafish')" style="
+                background:none; border:none; cursor:pointer;
+                color:#43a047; font-size:0.9rem; padding:4px 0;
+            ">← Back</button>
+
+            <!-- 搜索框 -->
+            <div style="position:relative; display:flex; align-items:center; gap:8px;">
+                <div style="position:relative;">
+                    <input id="geneSearchInput"
+                        type="text"
+                        placeholder="Search gene..."
+                        oninput="onGeneInput(this.value)"
+                        style="
+                            padding:6px 12px;
+                            border:1px solid #ddd;
+                            border-radius:6px;
+                            font-size:0.88rem;
+                            width:200px;
+                            outline:none;
+                        ">
+                    <!-- 下拉候选列表 -->
+                    <div id="geneDropdown" style="
+                        display:none;
+                        position:absolute;
+                        top:100%;
+                        left:0;
+                        width:100%;
+                        background:white;
+                        border:1px solid #ddd;
+                        border-radius:6px;
+                        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+                        max-height:200px;
+                        overflow-y:auto;
+                        z-index:200;
+                        margin-top:4px;
+                    "></div>
+                </div>
+                <button onclick="searchGene()" style="
+                    padding:6px 16px;
+                    background:#43a047;
+                    color:white;
+                    border:none;
+                    border-radius:6px;
+                    font-size:0.88rem;
+                    cursor:pointer;
+                ">Search</button>
+            </div>
+        </div>
+
+        <svg id="trajSvg" style="width:100%; height:calc(100% - 41px); display:block;"></svg>
+    </div>
+
+    <!-- 基因表达弹窗 -->
+    <div id="geneModal" style="
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.5);
+        z-index:200;
+    " onclick="closeGeneModal()">
+        <div onclick="event.stopPropagation()" style="
+            background:white;
+            width:680px;
+            margin:80px auto;
+            border-radius:12px;
+            overflow:hidden;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <!-- 头部 -->
+            <div style="
+                padding:16px 24px;
+                border-bottom:2px solid #eee;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+            ">
+                <div>
+                    <h2 id="geneModalTitle" style="margin:0; font-size:1.1rem;"></h2>
+                    <p style="margin:4px 0 0; color:#888; font-size:0.85rem;">
+                        Gene expression across developmental stages
+                    </p>
+                </div>
+                <button onclick="closeGeneModal()" style="
+                    background:none; border:none;
+                    font-size:1.4rem; cursor:pointer; color:#bbb;
+                ">✕</button>
+            </div>
+            <!-- 图表 -->
+            <div style="padding:20px 24px;">
+                <img id="geneExprImg" src="Gene_expression.png"
+                    style="width:100%; height:auto; border-radius:6px;">
+            </div>
+        </div>
+    </div>
+    
+
+    <script>
+
+        const buttons = document.querySelectorAll('.nav-btn');
+        function showPage(pageName) {
+            // 隐藏所有页面
+            document.getElementById('page-home').style.display          = 'none';
+            document.getElementById('page-zebrafish').style.display     = 'none';
+            document.getElementById('page-zebrafish-sc').style.display  = 'none';
+
+            if (pageName === 'home') {
+                document.getElementById('page-home').style.display = 'block';
+            }
+            if (pageName === 'zebrafish') {
+                document.getElementById('page-zebrafish').style.display = 'block';
+            }
+            if (pageName === 'zebrafish-sc') {
+                document.getElementById('page-zebrafish-sc').style.display = 'block';
+                setTimeout(function() {
+                    if (window._lastData) {
+                        drawGraph(window._lastData.edges, window._lastData.dashedEdges);
+                    }
+                }, 50);
+            }
+        }
+
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                buttons.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+
+                const label = btn.textContent.trim();
+                if (label === '主页')  showPage('home');
+                if (label === '斑马鱼') showPage('zebrafish');
+            });
+        });
+
+
+        function handleFile(input) {
+
+            // 拿到用户的文件
+            const file = input.files[0];
+            console.log('文件名：', file.name);
+            console.log('文件大小： ', file.size, '字节')
+
+            // 读取文件内容
+            const reader = new FileReader();
+
+            // 读取完成后触发这个函数
+            reader.onload = function(e) {
+                const text = e.target.result;        // 文件的全部文字
+               
+                // 调用解析函数
+                const data = parseData(text);
+
+                //调用显示函数
+                showResult(data);
+
+            };
+
+            // 开始读取
+            reader.readAsText(file);
+        }
+
+        function parseData(text) {
+            const lines = text.trim().split('\n');
+            const edges = [];
+            const dashedEdges = [];  // 新增：存放虚线边
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const parts = line.split('\t');
+                const source = parts[0].trim();
+                const target = parts[1].trim();
+                const weight = parseFloat(parts[2]);
+
+                if (weight >= 0.3) {
+                    edges.push({ source, target, weight });
+                } else {
+                    // 来源和目标是同一细胞类型（跨时间点自我维持），画虚线
+                    const srcCelltype = source.slice(source.indexOf(':') + 1);
+                    const tgtCelltype = target.slice(target.indexOf(':') + 1);
+                    if (srcCelltype === tgtCelltype) {
+                        dashedEdges.push({ source, target, weight });
+                    }
+                }
+            }
+            return { edges, dashedEdges };
+        }
+
+
+
+        function showResult(data) {
+        // 读取R导出的排序文件
+            fetch('cell_order.json')
+                .then(r => r.json())
+                .then(function(order) {
+                    window._cellOrder = order;
+                    console.log('排序加载完成，stages:', order.stages.length, 'celltypes:', order.celltypes.length);
+                })
+                .catch(function() {
+                    console.warn('cell_order.json 未找到，使用默认排序');
+                    window._cellOrder = null;
+                });
+
+         // 读取颜色配置
+            fetch('color_config.json')
+                .then(r => r.json())
+                .then(function(colors) {
+                    window._colorConfig = colors;
+                    console.log('颜色配置加载完成');
+                })
+                .catch(function() {
+                    console.warn('color_config.json 未找到，使用默认颜色');
+                    window._colorConfig = null;
+                });
+        }
+
+        // ── 颜色函数 ──
+        function getColor(celltype) {
+            // 从数组中取第一个值的辅助函数
+            const pick = v => Array.isArray(v) ? v[0] : v;
+
+            // 优先按细胞类型精确匹配
+            if (window._colorConfig && window._colorConfig.color_celltype) {
+                const c = window._colorConfig.color_celltype[celltype];
+                if (c) return pick(c);
+            }
+            // 备用：germ layer关键词匹配
+            if (window._colorConfig && window._colorConfig.color_germlayer) {
+                const gl = window._colorConfig.color_germlayer;
+                const name = celltype.toLowerCase();
+                if (name.includes('neural')     || name.includes('neuro')   ||
+                    name.includes('brain')      || name.includes('optic')   ||
+                    name.includes('retina')     || name.includes('diencephalon') ||
+                    name.includes('hindbrain')  || name.includes('spinal')  ||
+                    name.includes('roofplate')  || name.includes('floorplate'))
+                    return pick(gl['neuroectoderm']) || '#006234';
+                if (name.includes('epidermal')  || name.includes('placode') ||
+                    name.includes('ionocyte')   || name.includes('hatching') ||
+                    name.includes('periderm')   || name.includes('evl'))
+                    return pick(gl['surface ectoderm']) || '#98135E';
+                if (name.includes('mesoderm')   || name.includes('heart')   ||
+                    name.includes('myotome')    || name.includes('notochord') ||
+                    name.includes('macrophage') || name.includes('endotheli') ||
+                    name.includes('blood')      || name.includes('erythroid') ||
+                    name.includes('pharyngeal') || name.includes('pronephric'))
+                    return pick(gl['mesoderm']) || '#1070B1';
+                if (name.includes('endoderm')   || name.includes('gut'))
+                    return pick(gl['endoderm']) || '#917A30';
+                if (name.includes('blastomere') || name.includes('forerunner') ||
+                    name.includes('germline')   || name.includes('del'))
+                    return pick(gl['exe embryo']) || '#EE8E2F';
+                return pick(gl['other']) || 'gray';
+            }
+            return '#555555';
+        }
+        // ── D3 画图 ──
+        let currentSvg = null;
+
+        function drawGraph(edges, dashedEdges) {
+
+            // 1. 从边数据提取所有节点
+            const nodeMap = new Map();
+            edges.concat(dashedEdges).forEach(function(e) {
+                [e.source, e.target].forEach(function(key) {
+                    if (!nodeMap.has(key)) {
+                        const colonIdx = key.indexOf(':');
+                        const timeStr  = key.slice(0, colonIdx);
+                        const celltype = key.slice(colonIdx + 1);
+                        nodeMap.set(key, { key, timeStr, celltype });
+                    }
+                });
+            });
+            const nodes = Array.from(nodeMap.values());
+
+            // 时间点顺序：优先用R导出的stages，否则按数字排序
+            const allTimepoints = [...new Set(nodes.map(n => n.timeStr))];
+            const timepoints = (window._cellOrder && window._cellOrder.stages)
+                ? window._cellOrder.stages.filter(s => allTimepoints.includes(s))
+                : allTimepoints.sort((a, b) => parseFloat(a) - parseFloat(b));
+
+            // 细胞类型顺序：优先用R导出的celltypes，否则按字母排序
+            const allCelltypes = [...new Set(nodes.map(n => n.celltype))];
+            const celltypes = (window._cellOrder && window._cellOrder.celltypes)
+                ? window._cellOrder.celltypes.filter(c => allCelltypes.includes(c))
+                : allCelltypes.sort();
+
+            // 3. 布局参数
+            const COL = 68.5;   // 参考TOME: d.y = d.depth * 68.5
+            const ROW = 15;
+            const M = { top: 30, right: 250, bottom: 60, left: 120 };  // 左端方案
+
+            const svgW = M.left + timepoints.length * COL + M.right;
+            const svgH = M.top  + celltypes.length  * ROW + M.bottom;
+
+            const xOf = tp => M.left + timepoints.indexOf(tp) * COL;
+            const yOf = ct => M.top  + (celltypes.length - 1 - celltypes.indexOf(ct)) * ROW;
+
+            nodes.forEach(n => { n.x = xOf(n.timeStr); n.y = yOf(n.celltype); });
+
+            // 4. 建立 SVG
+            const container = document.getElementById('trajSvg');
+            d3.select('#trajSvg').selectAll('*').remove();
+            const svgSel = d3.select('#trajSvg');
+
+            const viewW = container.clientWidth;
+            const viewH = container.clientHeight;
+            const scale  = Math.min(viewW / svgW, viewH / svgH) * 0.96;
+            const tx = (viewW - svgW * scale) / 2;
+            const ty = (viewH - svgH * scale) / 2;
+            const initT = d3.zoomIdentity.translate(tx, ty).scale(scale);
+
+            const g = svgSel.append('g').attr('transform', initT.toString());
+
+            const zoomBehavior = d3.zoom()
+                .scaleExtent([0.05, 10])
+                .on('zoom', e => g.attr('transform', e.transform));
+            svgSel.call(zoomBehavior).call(zoomBehavior.transform, initT);
+
+            // 5. 时间点竖向参考线 + 顶部标签
+            timepoints.forEach(tp => {
+                const x = xOf(tp);
+                g.append('line')
+                    .attr('x1', x).attr('y1', M.top - 10)
+                    .attr('x2', x).attr('y2', M.top + celltypes.length * ROW)
+                    .attr('stroke', '#ebebeb').attr('stroke-width', 1);
+                g.append('text')
+                    .attr('x', x).attr('y', M.top - 14)
+                    .text(tp)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', 'bold')
+                    .attr('fill', '#333');
+            });
+
+            // 6. 虚线边（自我维持）
+            dashedEdges.forEach(e => {
+                const s = nodeMap.get(e.source), t = nodeMap.get(e.target);
+                if (!s || !t) return;
+                g.append('line')
+                    .attr('x1', s.x).attr('y1', s.y)
+                    .attr('x2', t.x).attr('y2', t.y)
+                    .attr('stroke', '#aaa')
+                    .attr('stroke-width', 0.8)
+                    .attr('stroke-opacity', e.weight)
+                    .attr('stroke-dasharray', '3,2');
+            });
+
+            // 7. 实线边
+            edges.forEach(e => {
+                const s = nodeMap.get(e.source), t = nodeMap.get(e.target);
+                if (!s || !t) return;
+                g.append('line')
+                    .attr('x1', s.x).attr('y1', s.y)
+                    .attr('x2', t.x).attr('y2', t.y)
+                    .attr('stroke', '#000')
+                    .attr('stroke-width', Math.max(0.4, e.weight * 5))
+                    .attr('stroke-opacity', 0.2 + e.weight * 0.75);
+            });
+
+            // 8. 节点
+            nodes.forEach(n => {
+                g.append('circle')
+                    .attr('cx', n.x).attr('cy', n.y).attr('r', 6)
+                    .attr('fill',   getColor(n.celltype))
+                    .attr('stroke', getColor(n.celltype))
+                    .attr('stroke-width', 1)
+                    .style('cursor', 'pointer')
+                    .on('mouseover', function(event) {
+                        // 其他节点变透明，当前节点高亮
+                        g.selectAll('circle').style('opacity', 0.15);
+                        g.selectAll('path,line[stroke="#000"]').style('opacity', 0.05);
+                        d3.select(this).style('opacity', 1).attr('r', 9);
+                    })
+                    .on('mouseout', function() {
+                        g.selectAll('circle').style('opacity', 1);
+                        g.selectAll('line').style('opacity', null);
+                        d3.select(this).attr('r', 6);
+                    })
+                    .on('click', function() { openModal(n); });
+            });
+
+            // 9. 右侧细胞类型标签（可点击）
+            celltypes.forEach(ct => {
+                const y = yOf(ct);
+                const x = M.left + timepoints.length * COL + 10;
+                const node = Array.from(nodeMap.values()).find(n => n.celltype === ct);
+                g.append('text')
+                    .attr('x', x).attr('y', y + 4)
+                    .text(ct)
+                    .attr('font-size', '10px')
+                    .attr('fill', getColor(ct))
+                    .style('cursor', 'pointer')
+                    .on('mouseover', function() { d3.select(this).attr('font-weight', 'bold'); })
+                    .on('mouseout',  function() { d3.select(this).attr('font-weight', 'normal'); })
+                    .on('click', function() { if (node) openLabelModal(node); });
+            });
+
+
+            // 10. Germ Layer 图例
+            const pick = v => Array.isArray(v) ? v[0] : (v || '#555555');
+            const gl = (window._colorConfig && window._colorConfig.color_germlayer) || {};
+            const legend = [
+                { label: 'Retina',           color: pick(gl['retina'])            || '#5A4FCF' },
+                { label: 'Neuroectoderm',    color: pick(gl['neuroectoderm'])     || '#006234' },
+                { label: 'Surface ectoderm', color: pick(gl['surface ectoderm'])  || '#98135E' },
+                { label: 'Mesoderm',         color: pick(gl['mesoderm'])          || '#1070B1' },
+                { label: 'Endoderm',         color: pick(gl['endoderm'])          || '#917A30' },
+                { label: 'Exe embryo',       color: pick(gl['exe embryo'])        || '#EE8E2F' },
+                { label: 'Other',            color: pick(gl['other'])             || 'gray'    },
+            ];
+
+            const legendX = 0;      // 左端
+            const legendY = M.top;
+
+            // 图例标题
+            g.append('text')
+                .attr('x', legendX)
+                .attr('y', legendY)
+                .text('Germ layer')
+                .attr('font-size', '11px')
+                .attr('font-weight', 'bold')
+                .attr('fill', '#333');
+
+            // 图例条目
+            legend.forEach(function(item, i) {
+                const iy = legendY + 18 + i * 18;
+
+                g.append('circle')
+                    .attr('cx', legendX + 6)
+                    .attr('cy', iy - 4)
+                    .attr('r', 6)
+                    .attr('fill', item.color);
+
+                g.append('text')
+                    .attr('x', legendX + 18)
+                    .attr('y', iy)
+                    .text(item.label)
+                    .attr('font-size', '10px')
+                    .attr('fill', '#333');
+            });
+        }
+
+        // 窗口缩放时重绘
+        window.addEventListener('resize', function() {
+            if (window._lastData) drawGraph(window._lastData.edges, window._lastData.dashedEdges);
+        });
+
+        // ── 弹框控制 ──
+
+
+        // 控制弹窗内容显示
+        let chartRNA = null, chartATAC = null, chartPET = null;
+
+        function openModal(node) {
+            document.getElementById('modalTitle').textContent = node.celltype;
+            document.getElementById('modalMeta').textContent  =
+                node.timeStr + '  ·  ' + node.key;
+
+            // 生成该细胞类型的 marker gene 数据并渲染表格
+            markerData        = generateFakeMarkers(node.celltype);
+            markerCurrentPage = 1;
+            renderMarkerTable();
+
+            switchTab('rna', document.querySelector('.tab-btn'));
+            document.getElementById('modalOverlay').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+
+
+
+        function openLabelModal(node) {
+            document.getElementById('labelModalTitle').textContent = node.celltype;
+            document.getElementById('labelModalMeta').textContent  =
+                node.timeStr + '  ·  ' + node.key;
+
+            switchLabelTab('rna', document.querySelector('.label-tab-btn'));
+            document.getElementById('labelModalOverlay').style.display = 'block';
+        }
+
+        function closeLabelModal() {
+            document.getElementById('labelModalOverlay').style.display = 'none';
+        }
+
+        function switchLabelTab(tabName, clickedBtn) {
+            document.getElementById('label-tab-rna').style.display  = 'none';
+            document.getElementById('label-tab-atac').style.display = 'none';
+            document.getElementById('label-tab-pet').style.display  = 'none';
+
+            document.getElementById('label-tab-' + tabName).style.display = 'block';
+
+            document.querySelectorAll('.label-tab-btn').forEach(function(btn) {
+                btn.style.borderBottom = '3px solid transparent';
+                btn.style.color        = '#888';
+                btn.style.fontWeight   = 'normal';
+            });
+            clickedBtn.style.borderBottom = '3px solid #43a047';
+            clickedBtn.style.color        = '#43a047';
+            clickedBtn.style.fontWeight   = 'bold';
+        }
+
+        // Tab 切换
+        function switchTab(tabName, clickedBtn) {
+            document.getElementById('tab-rna').style.display  = 'none';
+            document.getElementById('tab-atac').style.display = 'none';
+            document.getElementById('tab-pet').style.display  = 'none';
+
+            document.getElementById('tab-' + tabName).style.display = 'flex';
+
+            document.querySelectorAll('.tab-btn').forEach(function(btn) {
+                btn.style.borderBottom = '3px solid transparent';
+                btn.style.color        = '#888';
+                btn.style.fontWeight   = 'normal';
+            });
+            clickedBtn.style.borderBottom = '3px solid #43a047';
+            clickedBtn.style.color        = '#43a047';
+            clickedBtn.style.fontWeight   = 'bold';
+        }
+        
+
+
+                // ── 基因搜索 ──
+
+        // 测试用基因列表，后续替换为真实数据
+        const GENE_LIST = [
+            'sox2', 'pax6', 'tbx5', 'gata1', 'foxa2', 'myh7', 'kdra', 'fn1',
+            'runx1', 'actb', 'cdh1', 'vim', 'sox17', 'hand2', 'nkx2.5', 'gsc',
+            'chordin', 'bmp4', 'fgf8a', 'wnt3a', 'notch1a', 'delta', 'her1',
+            'her7', 'olig2', 'neurog1', 'atoh1a', 'ascl1a', 'pax2a', 'pax8',
+            'six1b', 'eya1', 'foxd3', 'sox10', 'mitfa', 'tfec', 'slc45a2',
+            'rag1', 'ptprc', 'cxcr4b', 'sdf1a', 'vegfaa', 'flk1', 'tie1',
+            'gata2a', 'tal1', 'lmo2', 'hbbe1', 'alas2'
+        ];
+
+        function onGeneInput(val) {
+            const dropdown = document.getElementById('geneDropdown');
+            const query = val.trim().toLowerCase();
+
+            if (!query) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const matches = GENE_LIST.filter(g => g.toLowerCase().startsWith(query)).slice(0, 8);
+
+            if (matches.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            dropdown.innerHTML = matches.map(g => `
+                <div onclick="selectGene('${g}')" style="
+                    padding:8px 12px;
+                    cursor:pointer;
+                    font-size:0.88rem;
+                    color:#333;
+                "
+                onmouseover="this.style.background='#f5f5f5'"
+                onmouseout="this.style.background='white'">
+                    ${g}
+                </div>
+            `).join('');
+
+            dropdown.style.display = 'block';
+        }
+
+        function selectGene(gene) {
+            document.getElementById('geneSearchInput').value = gene;
+            document.getElementById('geneDropdown').style.display = 'none';
+            searchGene();
+        }
+
+        function searchGene() {
+            const input = document.getElementById('geneSearchInput').value.trim().toLowerCase();
+            document.getElementById('geneDropdown').style.display = 'none';
+
+            if (!input) return;
+
+            const found = GENE_LIST.find(g => g.toLowerCase() === input);
+
+            if (!found) {
+                alert('Gene "' + input + '" not found.\nPlease check the gene name and try again.');
+                return;
+            }
+
+            // 显示弹窗
+            document.getElementById('geneModalTitle').textContent = found.toUpperCase();
+            document.getElementById('geneExprImg').src = 'Gene_expression.png';
+            document.getElementById('geneModal').style.display = 'block';
+        }
+
+        function closeGeneModal() {
+            document.getElementById('geneModal').style.display = 'none';
+            document.getElementById('geneSearchInput').value = '';
+        }
+
+        // 点击页面其他地方关闭下拉列表
+        document.addEventListener('click', function(e) {
+            const input  = document.getElementById('geneSearchInput');
+            const dropdown = document.getElementById('geneDropdown');
+            if (input && !input.contains(e.target)) {
+                if (dropdown) dropdown.style.display = 'none';
+            }
+        });
+
+
+
+
+
+
+
+
+        // ── Marker Gene 表格 ──
+
+        const ROWS_PER_PAGE = 10;
+        let markerCurrentPage = 1;
+        let markerData = [];
+
+        // 测试用数据，后续替换为真实数据
+        function generateFakeMarkers(celltype) {
+            const genes = [
+                'sox2','pax6','tbx5','gata1','foxa2','myh7','kdra','fn1','runx1','actb',
+                'cdh1','vim','sox17','hand2','nkx2.5','gsc','chordin','bmp4','fgf8a','wnt3a',
+                'notch1a','delta','her1','her7','olig2','neurog1','atoh1a','ascl1a','pax2a',
+                'pax8','six1b','eya1','foxd3','sox10','mitfa','tfec','slc45a2','rag1','ptprc',
+                'cxcr4b','sdf1a','vegfaa','flk1','tie1','gata2a','tal1','lmo2','hbbe1','alas2',
+                'cdx4','hoxa9a','meis1b','pbx1a','runx2b','klf2a','etv2','scl','lyl1','fli1a',
+                'hhex','prox1a','lyve1','pdgfrb','acta2','tagln','myocd','srf','mef2ca','mef2cb',
+                'tbx20','nkx2.7','gata4','gata5','hand1','irx4a','vmhca','vmhcb','amhca','amhcb',
+                'cx43','gja5b','hcn4','scn5lab','kcnq1','kcnh2','cacna1c','ryr2a','atp2a2a','tnnt2a'
+            ];
+
+            const rand = (seed) => {
+                let h = seed * 1234567;
+                return () => {
+                    h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
+                    return h / 0xffffffff;
+                };
+            };
+
+            const r = rand(celltype.length + celltype.charCodeAt(0));
+
+            return genes.slice(0, 50).map((gene, i) => ({
+                gene:     gene,
+                p_val:    (r() * 0.05).toExponential(2),
+                avg_log2FC: (r() * 4 - 0.5).toFixed(3),
+                pct_1:    (r() * 0.8 + 0.1).toFixed(2),
+                pct_2:    (r() * 0.4).toFixed(2),
+                p_val_adj:(r() * 0.05).toExponential(2),
+                cluster:  celltype,
+            }));
+        }
+
+        const MARKER_COLS = [
+            { key: 'gene',       label: 'Gene'       },
+            { key: 'p_val',      label: 'p_val'      },
+            { key: 'avg_log2FC', label: 'avg_log2FC' },
+            { key: 'pct_1',      label: 'pct.1'      },
+            { key: 'pct_2',      label: 'pct.2'      },
+            { key: 'p_val_adj',  label: 'p_val_adj'  },
+            { key: 'cluster',    label: 'Cluster'    },
+        ];
+
+        function renderMarkerTable(highlightGene) {
+            const totalPages = Math.min(10, Math.ceil(markerData.length / ROWS_PER_PAGE));
+            const start      = (markerCurrentPage - 1) * ROWS_PER_PAGE;
+            const pageData   = markerData.slice(start, start + ROWS_PER_PAGE);
+
+            // 表头
+            const thead = document.getElementById('markerThead');
+            thead.innerHTML = '<tr>' + MARKER_COLS.map(c => `
+                <th style="
+                    padding:8px 10px; text-align:left;
+                    font-size:0.8rem; color:#555; font-weight:600;
+                    border-bottom:2px solid #e0e0e0; white-space:nowrap;
+                ">${c.label}</th>
+            `).join('') + '</tr>';
+
+                // 表体
+            const tbody = document.getElementById('markerTbody');
+            tbody.innerHTML = pageData.map((row, idx) => {
+                const isHighlight = highlightGene && row.gene.toLowerCase() === highlightGene.toLowerCase();
+                const baseBg      = isHighlight ? '#fff9c4' : (idx % 2 === 0 ? 'white' : '#fafafa');
+                const hoverBg     = isHighlight ? '#fff176' : '#f0f7f0';
+                return `
+                    <tr style="background:${baseBg};"
+                        onmouseover="this.style.background='${hoverBg}'"
+                        onmouseout="this.style.background='${baseBg}'">
+                        ${MARKER_COLS.map(c => `
+                            <td style="
+                                padding:7px 10px;
+                                border-bottom:1px solid #f0f0f0;
+                                font-size:0.8rem;
+                                color:${isHighlight ? '#e65100' : '#333'};
+                                font-weight:${isHighlight ? 'bold' : 'normal'};
+                                white-space:nowrap;
+                            ">${row[c.key]}</td>
+                        `).join('')}
+                    </tr>
+                `;
+            }).join('');
+            // 页码信息
+            const total = markerData.length;
+            document.getElementById('markerPageInfo').textContent =
+                `Showing ${start + 1}–${Math.min(start + ROWS_PER_PAGE, total)} of ${total} genes  (Page ${markerCurrentPage}/${totalPages})`;
+
+            // 页码按钮
+            const pageBtns = document.getElementById('markerPageBtns');
+            pageBtns.innerHTML = Array.from({length: totalPages}, (_, i) => i + 1).map(p => `
+                <button onclick="markerGoPage(${p})" style="
+                    padding:4px 9px; border-radius:4px; font-size:0.8rem; cursor:pointer;
+                    border:1px solid ${p === markerCurrentPage ? '#43a047' : '#ddd'};
+                    background:${p === markerCurrentPage ? '#43a047' : 'white'};
+                    color:${p === markerCurrentPage ? 'white' : '#555'};
+                ">${p}</button>
+            `).join('');
+
+            // 按钮状态
+            document.getElementById('markerPrevBtn').disabled = markerCurrentPage === 1;
+            document.getElementById('markerNextBtn').disabled = markerCurrentPage === totalPages;
+            document.getElementById('markerPrevBtn').style.opacity = markerCurrentPage === 1        ? '0.4' : '1';
+            document.getElementById('markerNextBtn').style.opacity = markerCurrentPage === totalPages ? '0.4' : '1';
+        }
+
+        function markerGoPage(p) {
+            const totalPages = Math.min(10, Math.ceil(markerData.length / ROWS_PER_PAGE));
+            if (p < 1 || p > totalPages) return;
+            markerCurrentPage = p;
+            renderMarkerTable();
+        }
+
+        function markerPrevPage() { markerGoPage(markerCurrentPage - 1); }
+        function markerNextPage() { markerGoPage(markerCurrentPage + 1); }
+
+
+                // ── Marker 表内基因搜索 ──
+
+        function onMarkerSearchInput(val) {
+            const dropdown = document.getElementById('markerSearchDropdown');
+            const query    = val.trim().toLowerCase();
+
+            if (!query) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            // 从当前 markerData 里匹配基因名
+            const matches = markerData
+                .filter(row => row.gene.toLowerCase().startsWith(query))
+                .slice(0, 8);
+
+            if (matches.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            dropdown.innerHTML = matches.map(row => `
+                <div onclick="selectMarkerGene('${row.gene}')" style="
+                    padding:6px 10px;
+                    cursor:pointer;
+                    font-size:0.82rem;
+                    color:#333;
+                "
+                onmouseover="this.style.background='#f5f5f5'"
+                onmouseout="this.style.background='white'">
+                    ${row.gene}
+                </div>
+            `).join('');
+
+            dropdown.style.display = 'block';
+        }
+
+        function selectMarkerGene(gene) {
+            document.getElementById('markerSearchInput').value = gene;
+            document.getElementById('markerSearchDropdown').style.display = 'none';
+            searchMarkerGene();
+        }
+
+        function searchMarkerGene() {
+            const input = document.getElementById('markerSearchInput').value.trim().toLowerCase();
+            document.getElementById('markerSearchDropdown').style.display = 'none';
+
+            if (!input) return;
+
+            // 找到该基因在 markerData 里的位置
+            const idx = markerData.findIndex(row => row.gene.toLowerCase() === input);
+
+            if (idx === -1) {
+                alert('Gene "' + input + '" not found in this cell type.');
+                return;
+            }
+
+            // 跳转到该基因所在页并高亮
+            const targetPage = Math.ceil((idx + 1) / ROWS_PER_PAGE);
+            markerCurrentPage = Math.min(targetPage, 10);
+            renderMarkerTable(input);  // 传入高亮基因名
+        }
+
+        // 关闭弹窗时清空搜索框
+        const _origCloseModal = closeModal;
+        closeModal = function() {
+            _origCloseModal();
+            document.getElementById('markerSearchInput').value = '';
+            document.getElementById('markerSearchDropdown').style.display = 'none';
+        };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // 页面加载完成后，自动读取同目录下的 data.txt
+        window.onload = function() {
+            fetch('data.txt')
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('文件读取失败，请确认 data.txt 和 index.html 在同一文件夹');
+                    }
+                    return response.text();
+                })
+                .then(function(text) {
+                    // 解析数据
+                    const data = parseData(text);
+                    console.log('数据加载成功，有效边数量：', data.edges.length);
+                    window._lastData = data;
+                    showResult(data);
+                })
+                .catch(function(error) {
+                    alert('❌ 错误：' + error.message + '\n\n请用 VS Code 的 Live Server 插件打开网页，不要直接双击 HTML 文件！');
+                });
+        };
+        
+    </script>
+
+
+        <!-- 右侧标签专用弹窗 -->
+    <div id="labelModalOverlay" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 100;
+    " onclick="closeLabelModal()">
+
+        <div onclick="event.stopPropagation()" style="
+            background: white;
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <!-- 头部 -->
+            <div style="
+                padding: 16px 24px;
+                border-bottom: 2px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <div>
+                    <h2 id="labelModalTitle" style="margin:0; font-size:1.1rem;"></h2>
+                    <p id="labelModalMeta" style="margin:4px 0 0; color:#888; font-size:0.85rem;"></p>
+                </div>
+                <button onclick="closeLabelModal()" style="
+                    background: none; border: none;
+                    font-size: 1.4rem; cursor: pointer; color: #bbb;
+                ">✕</button>
+            </div>
+
+            <!-- 左右布局 -->
+            <div style="display:flex; height:500px;">
+
+                <!-- 左侧：UMAP -->
+                <div style="
+                    width:45%;
+                    border-right:1px solid #eee;
+                    padding:16px;
+                    display:flex;
+                    flex-direction:column;
+                ">
+                    <p style="color:#888; font-size:0.85rem; margin:0 0 10px 0;">UMAP</p>
+                    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+                        <img src="UMAP.png"
+                            style="max-width:100%; max-height:100%; object-fit:contain;">
+                    </div>
+                </div>
+
+                <!-- 右侧：RNA/ATAC/PET -->
+                <div style="
+                    width:55%;
+                    padding:16px;
+                    display:flex;
+                    flex-direction:column;
+                ">
+                    <!-- Tab 按钮 -->
+                    <div style="display:flex; border-bottom:1px solid #eee; margin-bottom:12px;">
+                        <button class="label-tab-btn" onclick="switchLabelTab('rna', this)"
+                            style="padding:8px 16px; border:none; background:none;
+                                cursor:pointer; font-size:0.9rem;
+                                border-bottom: 3px solid #43a047; color:#43a047; font-weight:bold;">
+                            RNA-seq
+                        </button>
+                        <button class="label-tab-btn" onclick="switchLabelTab('atac', this)"
+                            style="padding:8px 16px; border:none; background:none;
+                                cursor:pointer; font-size:0.9rem;
+                                border-bottom: 3px solid transparent; color:#888;">
+                            ATAC-seq
+                        </button>
+                        <button class="label-tab-btn" onclick="switchLabelTab('pet', this)"
+                            style="padding:8px 16px; border:none; background:none;
+                                cursor:pointer; font-size:0.9rem;
+                                border-bottom: 3px solid transparent; color:#888;">
+                            PET
+                        </button>
+                    </div>
+
+                    <!-- 内容区域 -->
+                    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+                        <div id="label-tab-rna" style="width:100%; display:flex; align-items:center; justify-content:center;">
+                            <img src="RNA.png" style="max-width:100%; max-height:380px; object-fit:contain;">
+                        </div>
+                        <div id="label-tab-atac" style="display:none; width:100%; align-items:center; justify-content:center;">
+                            <img src="ATAC.png" style="max-width:100%; max-height:380px; object-fit:contain;">
+                        </div>
+                        <div id="label-tab-pet" style="display:none; width:100%; align-items:center; justify-content:center;">
+                            <img src="PET.png" style="max-width:100%; max-height:380px; object-fit:contain;">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- 左侧标签专用弹窗 -->
+
+    <!-- 弹框遮罩 -->
+    <div id="modalOverlay" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 100;
+    " onclick="closeModal()">
+
+        <!-- 弹框本体 -->
+        <div onclick="event.stopPropagation()" style="
+            background: white;
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <!-- 弹框头部 -->
+            <div style="
+                padding: 16px 24px;
+                border-bottom: 2px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <div>
+                    <h2 id="modalTitle" style="margin:0; font-size:1.1rem;"></h2>
+                    <p id="modalMeta" style="margin:4px 0 0; color:#888; font-size:0.85rem;"></p>
+                </div>
+                <button onclick="closeModal()" style="
+                    background: none; border: none;
+                    font-size: 1.4rem; cursor: pointer; color: #bbb;
+                ">✕</button>
+            </div>
+
+            <!-- 左右布局 -->
+            <div style="display: flex; height: 500px;">
+
+                <!-- 左侧：UMAP -->
+                <div style="
+                    width: 45%;
+                    border-right: 1px solid #eee;
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                ">
+                    <p style="color:#888; font-size:0.85rem; margin: 0 0 10px 0;">UMAP</p>
+                    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+                        <img id="umapImg" src="UMAP.png"
+                            style="max-width:100%; max-height:100%; object-fit:contain;">
+                    </div>
+                </div>
+
+                <!-- 右侧：RNA/ATAC/PET -->
+                <div style="
+                    width: 55%;
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                ">
+                    <!-- Tab 按钮 -->
+                <!-- Tab 按钮 + 搜索框 -->
+                <div style="display:flex; align-items:center; border-bottom:1px solid #eee; margin-bottom:12px;">
+                    <button class="tab-btn" onclick="switchTab('rna', this)"
+                        style="padding:8px 16px; border:none; background:none;
+                            cursor:pointer; font-size:0.9rem;
+                            border-bottom: 3px solid #43a047; color:#43a047; font-weight:bold;">
+                        RNA-seq
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('atac', this)"
+                        style="padding:8px 16px; border:none; background:none;
+                            cursor:pointer; font-size:0.9rem;
+                            border-bottom: 3px solid transparent; color:#888;">
+                        ATAC-seq
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('pet', this)"
+                        style="padding:8px 16px; border:none; background:none;
+                            cursor:pointer; font-size:0.9rem;
+                            border-bottom: 3px solid transparent; color:#888;">
+                        PET
+                    </button>
+
+                    <!-- 右上角搜索框 -->
+                    <div style="margin-left:auto; position:relative; display:flex; align-items:center; gap:6px; padding-bottom:4px;">
+                        <div style="position:relative;">
+                            <input id="markerSearchInput"
+                                type="text"
+                                placeholder="Search gene..."
+                                oninput="onMarkerSearchInput(this.value)"
+                                style="
+                                    padding:4px 10px;
+                                    border:1px solid #ddd;
+                                    border-radius:6px;
+                                    font-size:0.8rem;
+                                    width:150px;
+                                    outline:none;
+                                ">
+                            <!-- 候选下拉 -->
+                            <div id="markerSearchDropdown" style="
+                                display:none;
+                                position:absolute;
+                                top:100%;
+                                left:0;
+                                width:100%;
+                                background:white;
+                                border:1px solid #ddd;
+                                border-radius:6px;
+                                box-shadow:0 4px 12px rgba(0,0,0,0.1);
+                                max-height:160px;
+                                overflow-y:auto;
+                                z-index:300;
+                                margin-top:4px;
+                            "></div>
+                        </div>
+                        <button onclick="searchMarkerGene()" style="
+                            padding:4px 12px;
+                            background:#43a047;
+                            color:white;
+                            border:none;
+                            border-radius:6px;
+                            font-size:0.8rem;
+                            cursor:pointer;
+                        ">Search</button>
+                    </div>
+                </div>
+
+                    <!-- 内容区域 -->
+                    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+
+
+                        <div id="tab-rna" style="width:100%; height:100%; display:flex; flex-direction:column;">
+                            <!-- 表格区域 -->
+                            <div style="flex:1; overflow:auto;">
+                                <table id="markerTable" style="
+                                    width:100%; border-collapse:collapse;
+                                    font-size:0.82rem;
+                                ">
+                                    <thead id="markerThead" style="
+                                        position:sticky; top:0;
+                                        background:#f8f8f8;
+                                    "></thead>
+                                    <tbody id="markerTbody"></tbody>
+                                </table>
+                            </div>
+                            <!-- 翻页控制 -->
+                            <div style="
+                                display:flex; align-items:center; justify-content:space-between;
+                                padding:8px 4px; border-top:1px solid #eee; flex-shrink:0;
+                            ">
+                                <span id="markerPageInfo" style="font-size:0.8rem; color:#888;"></span>
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <button onclick="markerPrevPage()" id="markerPrevBtn" style="
+                                        padding:4px 12px; border:1px solid #ddd; border-radius:4px;
+                                        background:white; cursor:pointer; font-size:0.8rem; color:#555;
+                                    ">← Prev</button>
+                                    <div id="markerPageBtns" style="display:flex; gap:4px;"></div>
+                                    <button onclick="markerNextPage()" id="markerNextBtn" style="
+                                        padding:4px 12px; border:1px solid #ddd; border-radius:4px;
+                                        background:white; cursor:pointer; font-size:0.8rem; color:#555;
+                                    ">Next →</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+                        <div id="tab-atac" style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                            <img src="ATAC.png" style="max-width:100%; max-height:400px; object-fit:contain;">
+                        </div>
+                        <div id="tab-pet" style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                            <img src="PET.png" style="max-width:100%; max-height:400px; object-fit:contain;">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+        
+</body>
+</html>
