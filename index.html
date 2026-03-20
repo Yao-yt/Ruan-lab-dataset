@@ -52,8 +52,7 @@
     <nav>
         <div class="nav-btn active"> 主页</div>
         <div class="nav-btn"> 斑马鱼</div>
-        <div class="nav-btn"> 小鼠</div>
-        <div class="nav-btn"> 爪蟾</div>
+        
     </nav>
 
         <!-- 主页内容 -->
@@ -81,7 +80,7 @@
                 Select a module to explore the dataset.
             </p>
 
-            <div style="display:flex; gap:32px;">
+            <div style="display:flex; gap:32px; align-items:stretch;">
 
                 <!-- Single Cell 卡片 -->
                 <div style="
@@ -90,12 +89,14 @@
                     border-radius:12px;
                     overflow:hidden;
                     box-shadow:0 2px 12px rgba(0,0,0,0.08);
+                    display:flex;
+                    flex-direction:column;
                 ">
                     <img src="singlecell_cover.png"
                         style="width:100%; height:200px; object-fit:cover; display:block;">
-                    <div style="padding:20px 24px 24px;">
+                    <div style="padding:20px 24px 24px; display:flex; flex-direction:column; flex:1;">
                         <h3 style="margin:0 0 8px; font-size:1.1rem; color:#222;">Single Cell</h3>
-                        <p style="margin:0 0 20px; color:#888; font-size:0.9rem; line-height:1.6;">
+                        <p style="margin:0 0 20px; color:#888; font-size:0.9rem; line-height:1.6; flex:1;">
                             Explore cell type trajectories across developmental time points.
                             Click on any node to view RNA-seq, ATAC-seq and PET results.
                         </p>
@@ -118,12 +119,14 @@
                     border-radius:12px;
                     overflow:hidden;
                     box-shadow:0 2px 12px rgba(0,0,0,0.08);
+                    display:flex;
+                    flex-direction:column;
                 ">
                     <img src="browser_cover.png"
                         style="width:100%; height:200px; object-fit:cover; display:block;">
-                    <div style="padding:20px 24px 24px;">
+                    <div style="padding:20px 24px 24px; display:flex; flex-direction:column; flex:1;">
                         <h3 style="margin:0 0 8px; font-size:1.1rem; color:#222;">Browser</h3>
-                        <p style="margin:0 0 20px; color:#888; font-size:0.9rem; line-height:1.6;">
+                        <p style="margin:0 0 20px; color:#888; font-size:0.9rem; line-height:1.6; flex:1;">
                             Browse genomic tracks and chromatin accessibility data
                             across cell types and stages.
                         </p>
@@ -139,9 +142,58 @@
                     </div>
                 </div>
 
+                <!-- GRN 卡片 -->
+                <div style="
+                    flex:1;
+                    background:white;
+                    border-radius:12px;
+                    overflow:hidden;
+                    box-shadow:0 2px 12px rgba(0,0,0,0.08);
+                    display:flex;
+                    flex-direction:column;
+                ">
+                    <img src="network.png"
+                        style="width:100%; height:200px; object-fit:cover; display:block;">
+                    <div style="padding:20px 24px 24px; display:flex; flex-direction:column; flex:1;">
+                        <h3 style="margin:0 0 8px; font-size:1.1rem; color:#222;">Gene Regulatory Network</h3>
+                        <p style="margin:0 0 20px; color:#888; font-size:0.9rem; line-height:1.6; flex:1;">
+                            Explore transcription factor regulons and gene regulatory
+                            networks across cell types and developmental stages.
+                        </p>
+                        <button onclick="showPage('zebrafish-grn')" style="
+                            padding:10px 24px;
+                            background:#6a1b9a;
+                            color:white;
+                            border:none;
+                            border-radius:6px;
+                            font-size:0.9rem;
+                            cursor:pointer;
+                        ">Explore →</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
+
+    <!-- 斑马鱼 GRN 页面 -->
+    <div id="page-zebrafish-grn" style="display:none; width:100%; min-height:calc(100vh - 52px); background:#fff;">
+        <div style="padding:8px 20px; border-bottom:1px solid #eee; background:white;">
+            <button onclick="showPage('zebrafish')" style="
+                background:none; border:none; cursor:pointer;
+                color:#6a1b9a; font-size:0.9rem; padding:4px 0;
+            ">← Back</button>
+        </div>
+        <div style="max-width:900px; margin:60px auto; padding:0 40px; text-align:center;">
+            <h2 style="color:#222; margin-bottom:16px;">Gene Regulatory Network</h2>
+            <p style="color:#888; font-size:1rem; margin-bottom:40px;">
+                Coming soon. This module will display transcription factor regulons
+                and gene regulatory networks.
+            </p>
+        </div>
+    </div>
+
+
 
     
     <!-- 斑马鱼 Single Cell 页面 -->
@@ -253,6 +305,7 @@
             document.getElementById('page-home').style.display          = 'none';
             document.getElementById('page-zebrafish').style.display     = 'none';
             document.getElementById('page-zebrafish-sc').style.display  = 'none';
+            document.getElementById('page-zebrafish-grn').style.display = 'none';
 
             if (pageName === 'home') {
                 document.getElementById('page-home').style.display = 'block';
@@ -267,6 +320,10 @@
                         drawGraph(window._lastData.edges, window._lastData.dashedEdges);
                     }
                 }, 50);
+            }
+
+            if (pageName === 'zebrafish-grn') {
+                document.getElementById('page-zebrafish-grn').style.display = 'block';
             }
         }
 
