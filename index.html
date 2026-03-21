@@ -291,8 +291,48 @@
             </div>
             <!-- 图表 -->
             <div style="padding:20px 24px;">
-                <img id="geneExprImg" src="Gene_expression.png"
-                    style="width:100%; height:auto; max-height:65vh; object-fit:contain; border-radius:6px;">
+                <!-- 缩放控制按钮 -->
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                    <button onclick="geneImgZoom(-0.2)" style="
+                        padding:4px 10px; border:1px solid #ddd; border-radius:4px;
+                        background:white; cursor:pointer; font-size:1rem; color:#555;
+                    ">－</button>
+                    <button onclick="geneImgZoom(0.2)" style="
+                        padding:4px 10px; border:1px solid #ddd; border-radius:4px;
+                        background:white; cursor:pointer; font-size:1rem; color:#555;
+                    ">＋</button>
+                    <button onclick="geneImgReset()" style="
+                        padding:4px 10px; border:1px solid #ddd; border-radius:4px;
+                        background:white; cursor:pointer; font-size:0.8rem; color:#555;
+                    ">Reset</button>
+                    <span id="geneImgScaleLabel" style="font-size:0.8rem; color:#aaa;">100%</span>
+                    <span style="font-size:0.75rem; color:#ccc; margin-left:8px;">
+                        滚轮缩放 · 拖拽移动
+                    </span>
+                </div>
+
+                <!-- 图片容器 -->
+                <div id="geneImgWrapper" style="
+                    overflow:hidden;
+                    border:1px solid #eee;
+                    border-radius:6px;
+                    height:60vh;
+                    cursor:grab;
+                    position:relative;
+                    background:#fafafa;
+                ">
+                    <img id="geneExprImg" src="Gene_expression.png"
+                        style="
+                            position:absolute;
+                            top:50%; left:50%;
+                            transform-origin:center center;
+                            transform:translate(-50%, -50%) scale(1);
+                            max-width:none;
+                            transition:none;
+                            user-select:none;
+                            -webkit-user-drag:none;
+                        ">
+                </div>
             </div>
         </div>
     </div>
@@ -423,42 +463,97 @@
 
         // ── 颜色函数 ──
         function getColor(celltype) {
-            // 从数组中取第一个值的辅助函数
-            const pick = v => Array.isArray(v) ? v[0] : v;
+            const germlayerMap = {
+                "photoreceptors": "retina",
+                "retinal bipolar cells": "retina",
+                "retinal interneurons": "retina",
+                "optic cup": "retina",
+                "retinal progenitors": "retina",
+                "preoptic area": "retina",
+                "retinal ganglion cells": "retina",
+                "retinal pigmented epithelium": "retina",
+                "optic primordia": "retina",
 
-            // 优先按细胞类型精确匹配
-            if (window._colorConfig && window._colorConfig.color_celltype) {
-                const c = window._colorConfig.color_celltype[celltype];
-                if (c) return pick(c);
-            }
-            // 备用：germ layer关键词匹配
-            if (window._colorConfig && window._colorConfig.color_germlayer) {
-                const gl = window._colorConfig.color_germlayer;
-                const name = celltype.toLowerCase();
-                if (name.includes('neural')     || name.includes('neuro')   ||
-                    name.includes('brain')      || name.includes('optic')   ||
-                    name.includes('retina')     || name.includes('diencephalon') ||
-                    name.includes('hindbrain')  || name.includes('spinal')  ||
-                    name.includes('roofplate')  || name.includes('floorplate'))
-                    return pick(gl['neuroectoderm']) || '#006234';
-                if (name.includes('epidermal')  || name.includes('placode') ||
-                    name.includes('ionocyte')   || name.includes('hatching') ||
-                    name.includes('periderm')   || name.includes('evl'))
-                    return pick(gl['surface ectoderm']) || '#98135E';
-                if (name.includes('mesoderm')   || name.includes('heart')   ||
-                    name.includes('myotome')    || name.includes('notochord') ||
-                    name.includes('macrophage') || name.includes('endotheli') ||
-                    name.includes('blood')      || name.includes('erythroid') ||
-                    name.includes('pharyngeal') || name.includes('pronephric'))
-                    return pick(gl['mesoderm']) || '#1070B1';
-                if (name.includes('endoderm')   || name.includes('gut'))
-                    return pick(gl['endoderm']) || '#917A30';
-                if (name.includes('blastomere') || name.includes('forerunner') ||
-                    name.includes('germline')   || name.includes('del'))
-                    return pick(gl['exe embryo']) || '#EE8E2F';
-                return pick(gl['other']) || 'gray';
-            }
-            return '#555555';
+                "neural anterior": "neuroectoderm",
+                "xanthoblast": "neuroectoderm",
+                "melanoblast": "neuroectoderm",
+                "neural crest": "neuroectoderm",
+                "midbrain ventral": "neuroectoderm",
+                "midbrain": "neuroectoderm",
+                "diencephalon": "neuroectoderm",
+                "neural plate anterior": "neuroectoderm",
+                "telencephalon": "neuroectoderm",
+                "diencephalon (aplnr2+)": "neuroectoderm",
+                "floorplate": "neuroectoderm",
+                "epiphysis photoreceptor cells": "neuroectoderm",
+                "roofplate": "neuroectoderm",
+                "hindbrain": "neuroectoderm",
+                "hindbrain dorsal": "neuroectoderm",
+                "hindbrain ventral": "neuroectoderm",
+                "neural plate posterior": "neuroectoderm",
+                "spinal cord": "neuroectoderm",
+                "differentiating neurons": "neuroectoderm",
+                "differentiating neurons (dlx1a+)": "neuroectoderm",
+                "differentiating neurons (eomesa+)": "neuroectoderm",
+
+                "olfactory placode": "surface ectoderm",
+                "lens": "surface ectoderm",
+                "lens placode": "surface ectoderm",
+                "anterior neural ridge": "surface ectoderm",
+                "lateral line primordium": "surface ectoderm",
+                "otic placode": "surface ectoderm",
+                "epidermal (gbx2+)": "surface ectoderm",
+                "epidermal": "surface ectoderm",
+                "epidermal (foxi3a+)": "surface ectoderm",
+                "ionocyte": "surface ectoderm",
+
+                "notochord": "mesoderm",
+                "mesoderm adaxial cells": "mesoderm",
+                "tailbud mesoderm": "mesoderm",
+                "myotome": "mesoderm",
+                "pharyngeal arch": "mesoderm",
+                "mesoderm lateral plate (tbx1+)": "mesoderm",
+                "mesoderm lateral plate": "mesoderm",
+                "heart": "mesoderm",
+                "pectoral fin field": "mesoderm",
+                "macrophage": "mesoderm",
+                "pronephric duct": "mesoderm",
+                "mesoderm lateral plate (fli1a+)": "mesoderm",
+                "blood island": "mesoderm",
+                "erythroid": "mesoderm",
+                "endothelial": "mesoderm",
+
+                "endoderm": "endoderm",
+                "gut": "endoderm",
+
+                "EVL": "exe embryo",
+                "periderm": "exe embryo",
+                "forerunner cells": "exe embryo",
+
+                "epiblast": "other",
+                "apoptotic like": "other",
+                "germline": "other",
+                "DEL": "other",
+                "prechordal plate": "other",
+                "hatching gland": "other",
+                "non dorsal margin involuted": "other",
+                "margin": "other",
+                "dorsal margin involuted": "other",
+            };
+
+            const colorMap = {
+                "retina":           "#554ACE",
+                "neuroectoderm":    "#005929",
+                "surface ectoderm": "#960F5B",
+                "mesoderm":         "#076BAE",
+                "endoderm":         "#897020",
+                "exe embryo":       "#EE8E2F",
+                "other":            "#BBBBBB",
+            };
+
+            const gl = germlayerMap[celltype];
+            if (gl && colorMap[gl]) return colorMap[gl];
+            return "#BBBBBB";
         }
         // ── D3 画图 ──
         let currentSvg = null;
@@ -599,21 +694,19 @@
                     .style('cursor', 'pointer')
                     .on('mouseover', function() { d3.select(this).attr('font-weight', 'bold'); })
                     .on('mouseout',  function() { d3.select(this).attr('font-weight', 'normal'); })
-                    .on('click', function() { if (node) openLabelModal(node); });
+                    .on('click', function() { if (node) openModal(node); });
             });
 
 
             // 10. Germ Layer 图例
-            const pick = v => Array.isArray(v) ? v[0] : (v || '#555555');
-            const gl = (window._colorConfig && window._colorConfig.color_germlayer) || {};
             const legend = [
-                { label: 'Retina',           color: pick(gl['retina'])            || '#5A4FCF' },
-                { label: 'Neuroectoderm',    color: pick(gl['neuroectoderm'])     || '#006234' },
-                { label: 'Surface ectoderm', color: pick(gl['surface ectoderm'])  || '#98135E' },
-                { label: 'Mesoderm',         color: pick(gl['mesoderm'])          || '#1070B1' },
-                { label: 'Endoderm',         color: pick(gl['endoderm'])          || '#917A30' },
-                { label: 'Exe embryo',       color: pick(gl['exe embryo'])        || '#EE8E2F' },
-                { label: 'Other',            color: pick(gl['other'])             || 'gray'    },
+                { label: 'Retina',           color: '#554ACE' },
+                { label: 'Neuroectoderm',    color: '#005929' },
+                { label: 'Surface ectoderm', color: '#960F5B' },
+                { label: 'Mesoderm',         color: '#076BAE' },
+                { label: 'Endoderm',         color: '#897020' },
+                { label: 'Exe embryo',       color: '#EE8E2F' },
+                { label: 'Other',            color: '#BBBBBB' },
             ];
 
             const legendX = 0;      // 左端
@@ -679,36 +772,7 @@
 
 
 
-        function openLabelModal(node) {
-            document.getElementById('labelModalTitle').textContent = node.celltype;
-            document.getElementById('labelModalMeta').textContent  =
-                node.timeStr + '  ·  ' + node.key;
-
-            switchLabelTab('rna', document.querySelector('.label-tab-btn'));
-            document.getElementById('labelModalOverlay').style.display = 'block';
-        }
-
-        function closeLabelModal() {
-            document.getElementById('labelModalOverlay').style.display = 'none';
-        }
-
-        function switchLabelTab(tabName, clickedBtn) {
-            document.getElementById('label-tab-rna').style.display  = 'none';
-            document.getElementById('label-tab-atac').style.display = 'none';
-            document.getElementById('label-tab-pet').style.display  = 'none';
-
-            document.getElementById('label-tab-' + tabName).style.display = 'block';
-
-            document.querySelectorAll('.label-tab-btn').forEach(function(btn) {
-                btn.style.borderBottom = '3px solid transparent';
-                btn.style.color        = '#888';
-                btn.style.fontWeight   = 'normal';
-            });
-            clickedBtn.style.borderBottom = '3px solid #43a047';
-            clickedBtn.style.color        = '#43a047';
-            clickedBtn.style.fontWeight   = 'bold';
-        }
-
+        
         // Tab 切换
         function switchTab(tabName, clickedBtn) {
             document.getElementById('tab-rna').style.display  = 'none';
@@ -803,6 +867,82 @@
             document.getElementById('geneModal').style.display = 'none';
             document.getElementById('geneSearchInput').value = '';
         }
+
+
+
+
+        // ── 基因表达图缩放和拖拽 ──
+        let geneImgScale = 1;
+        let geneImgX     = 0;
+        let geneImgY     = 0;
+        let geneImgDragging = false;
+        let geneImgDragStartX = 0;
+        let geneImgDragStartY = 0;
+
+        function geneImgApplyTransform() {
+            const img = document.getElementById('geneExprImg');
+            if (!img) return;
+            img.style.transform =
+                `translate(calc(-50% + ${geneImgX}px), calc(-50% + ${geneImgY}px)) scale(${geneImgScale})`;
+            document.getElementById('geneImgScaleLabel').textContent =
+                Math.round(geneImgScale * 100) + '%';
+        }
+
+        function geneImgZoom(delta) {
+            geneImgScale = Math.min(5, Math.max(0.2, geneImgScale + delta));
+            geneImgApplyTransform();
+        }
+
+        function geneImgReset() {
+            geneImgScale = 1;
+            geneImgX     = 0;
+            geneImgY     = 0;
+            geneImgApplyTransform();
+        }
+
+        // 滚轮缩放
+        document.addEventListener('DOMContentLoaded', function() {
+            const wrapper = document.getElementById('geneImgWrapper');
+            if (!wrapper) return;
+
+            wrapper.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.15 : 0.15;
+                geneImgZoom(delta);
+            }, { passive: false });
+
+            // 拖拽移动
+            wrapper.addEventListener('mousedown', function(e) {
+                geneImgDragging   = true;
+                geneImgDragStartX = e.clientX - geneImgX;
+                geneImgDragStartY = e.clientY - geneImgY;
+                wrapper.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!geneImgDragging) return;
+                geneImgX = e.clientX - geneImgDragStartX;
+                geneImgY = e.clientY - geneImgDragStartY;
+                geneImgApplyTransform();
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (geneImgDragging) {
+                    geneImgDragging = false;
+                    const wrapper = document.getElementById('geneImgWrapper');
+                    if (wrapper) wrapper.style.cursor = 'grab';
+                }
+            });
+        });
+
+        // 打开弹窗时重置缩放状态
+        const _origSearchGene = searchGene;
+        searchGene = function() {
+            _origSearchGene();
+            geneImgReset();
+        };
+
+
 
         // 点击页面其他地方关闭下拉列表
         document.addEventListener('click', function(e) {
@@ -1057,109 +1197,9 @@
     </script>
 
 
-        <!-- 右侧标签专用弹窗 -->
-    <div id="labelModalOverlay" style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 100;
-    " onclick="closeLabelModal()">
+        
 
-        <div onclick="event.stopPropagation()" style="
-            background: white;
-            width: 90%;
-            max-width: 1100px;
-            margin: 40px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        ">
-            <!-- 头部 -->
-            <div style="
-                padding: 16px 24px;
-                border-bottom: 2px solid #eee;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            ">
-                <div>
-                    <h2 id="labelModalTitle" style="margin:0; font-size:1.1rem;"></h2>
-                    <p id="labelModalMeta" style="margin:4px 0 0; color:#888; font-size:0.85rem;"></p>
-                </div>
-                <button onclick="closeLabelModal()" style="
-                    background: none; border: none;
-                    font-size: 1.4rem; cursor: pointer; color: #bbb;
-                ">✕</button>
-            </div>
 
-            <!-- 左右布局 -->
-            <div style="display:flex; height:500px;">
-
-                <!-- 左侧：UMAP -->
-                <div style="
-                    width:45%;
-                    border-right:1px solid #eee;
-                    padding:16px;
-                    display:flex;
-                    flex-direction:column;
-                ">
-                    <p style="color:#888; font-size:0.85rem; margin:0 0 10px 0;">UMAP</p>
-                    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
-                        <img src="UMAP.png"
-                            style="max-width:100%; max-height:100%; object-fit:contain;">
-                    </div>
-                </div>
-
-                <!-- 右侧：RNA/ATAC/PET -->
-                <div style="
-                    width:55%;
-                    padding:16px;
-                    display:flex;
-                    flex-direction:column;
-                ">
-                    <!-- Tab 按钮 -->
-                    <div style="display:flex; border-bottom:1px solid #eee; margin-bottom:12px;">
-                        <button class="label-tab-btn" onclick="switchLabelTab('rna', this)"
-                            style="padding:8px 16px; border:none; background:none;
-                                cursor:pointer; font-size:0.9rem;
-                                border-bottom: 3px solid #43a047; color:#43a047; font-weight:bold;">
-                            RNA-seq
-                        </button>
-                        <button class="label-tab-btn" onclick="switchLabelTab('atac', this)"
-                            style="padding:8px 16px; border:none; background:none;
-                                cursor:pointer; font-size:0.9rem;
-                                border-bottom: 3px solid transparent; color:#888;">
-                            ATAC-seq
-                        </button>
-                        <button class="label-tab-btn" onclick="switchLabelTab('pet', this)"
-                            style="padding:8px 16px; border:none; background:none;
-                                cursor:pointer; font-size:0.9rem;
-                                border-bottom: 3px solid transparent; color:#888;">
-                            PET
-                        </button>
-                    </div>
-
-                    <!-- 内容区域 -->
-                    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
-                        <div id="label-tab-rna" style="width:100%; display:flex; align-items:center; justify-content:center;">
-                            <img src="RNA.png" style="max-width:100%; max-height:380px; object-fit:contain;">
-                        </div>
-                        <div id="label-tab-atac" style="display:none; width:100%; align-items:center; justify-content:center;">
-                            <img src="ATAC.png" style="max-width:100%; max-height:380px; object-fit:contain;">
-                        </div>
-                        <div id="label-tab-pet" style="display:none; width:100%; align-items:center; justify-content:center;">
-                            <img src="PET.png" style="max-width:100%; max-height:380px; object-fit:contain;">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-        </div>
-    </div>
-
-    <!-- 左侧标签专用弹窗 -->
 
     <!-- 弹框遮罩 -->
     <div id="modalOverlay" style="
