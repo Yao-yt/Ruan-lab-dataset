@@ -253,6 +253,7 @@
         <svg id="trajSvg" style="width:100%; height:calc(100% - 41px); display:block;"></svg>
     </div>
 
+ 
     <!-- 基因表达弹窗 -->
     <div id="geneModal" style="
         display:none;
@@ -262,13 +263,15 @@
         z-index:200;
     " onclick="closeGeneModal()">
         <div onclick="event.stopPropagation()" style="
-            background: white;
-            width: 680px;
-            max-height: 85vh;
-            margin: 40px auto;
-            border-radius: 12px;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background:white;
+            width:90vw;
+            height:90vh;
+            margin:5vh auto;
+            border-radius:12px;
+            overflow:hidden;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3);
+            display:flex;
+            flex-direction:column;
         ">
             <!-- 头部 -->
             <div style="
@@ -277,6 +280,7 @@
                 display:flex;
                 justify-content:space-between;
                 align-items:center;
+                flex-shrink:0;
             ">
                 <div>
                     <h2 id="geneModalTitle" style="margin:0; font-size:1.1rem;"></h2>
@@ -289,54 +293,56 @@
                     font-size:1.4rem; cursor:pointer; color:#bbb;
                 ">✕</button>
             </div>
-            <!-- 图表 -->
-            <div style="padding:20px 24px;">
-                <!-- 缩放控制按钮 -->
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-                    <button onclick="geneImgZoom(-0.2)" style="
-                        padding:4px 10px; border:1px solid #ddd; border-radius:4px;
-                        background:white; cursor:pointer; font-size:1rem; color:#555;
-                    ">－</button>
-                    <button onclick="geneImgZoom(0.2)" style="
-                        padding:4px 10px; border:1px solid #ddd; border-radius:4px;
-                        background:white; cursor:pointer; font-size:1rem; color:#555;
-                    ">＋</button>
-                    <button onclick="geneImgReset()" style="
-                        padding:4px 10px; border:1px solid #ddd; border-radius:4px;
-                        background:white; cursor:pointer; font-size:0.8rem; color:#555;
-                    ">Reset</button>
-                    <span id="geneImgScaleLabel" style="font-size:0.8rem; color:#aaa;">100%</span>
-                    <span style="font-size:0.75rem; color:#ccc; margin-left:8px;">
-                        滚轮缩放 · 拖拽移动
-                    </span>
-                </div>
 
-                <!-- 图片容器 -->
-                <div id="geneImgWrapper" style="
-                    overflow:hidden;
-                    border:1px solid #eee;
-                    border-radius:6px;
-                    height:60vh;
-                    cursor:grab;
-                    position:relative;
-                    background:#fafafa;
-                ">
-                    <img id="geneExprImg" src="Gene_expression.png"
-                        style="
-                            position:absolute;
-                            top:50%; left:50%;
-                            transform-origin:center center;
-                            transform:translate(-50%, -50%) scale(1);
-                            max-width:none;
-                            transition:none;
-                            user-select:none;
-                            -webkit-user-drag:none;
-                        ">
-                </div>
+            <!-- 缩放控制按钮 -->
+            <div style="
+                padding:10px 24px;
+                border-bottom:1px solid #eee;
+                display:flex;
+                align-items:center;
+                gap:8px;
+                flex-shrink:0;
+            ">
+                <button onclick="geneImgZoom(-0.2)" style="
+                    padding:4px 10px; border:1px solid #ddd; border-radius:4px;
+                    background:white; cursor:pointer; font-size:1rem; color:#555;
+                ">－</button>
+                <button onclick="geneImgZoom(0.2)" style="
+                    padding:4px 10px; border:1px solid #ddd; border-radius:4px;
+                    background:white; cursor:pointer; font-size:1rem; color:#555;
+                ">＋</button>
+                <button onclick="geneImgReset()" style="
+                    padding:4px 10px; border:1px solid #ddd; border-radius:4px;
+                    background:white; cursor:pointer; font-size:0.8rem; color:#555;
+                ">Reset</button>
+                <span id="geneImgScaleLabel" style="font-size:0.8rem; color:#aaa;">100%</span>
+                <span style="font-size:0.75rem; color:#ccc; margin-left:8px;">
+                    滚轮缩放 · 拖拽移动
+                </span>
+            </div>
+
+            <!-- 图片容器：撑满剩余高度 -->
+            <div id="geneImgWrapper" style="
+                flex:1;
+                overflow:hidden;
+                cursor:grab;
+                position:relative;
+                background:#fafafa;
+            ">
+                <img id="geneExprImg" src="Gene_expression.png"
+                    style="
+                        position:absolute;
+                        top:50%; left:50%;
+                        transform-origin:center center;
+                        transform:translate(-50%, -50%) scale(1);
+                        max-width:none;
+                        user-select:none;
+                        -webkit-user-drag:none;
+                    ">
             </div>
         </div>
     </div>
-    
+        
 
     <script>
 
@@ -894,9 +900,18 @@
         }
 
         function geneImgReset() {
-            geneImgScale = 1;
-            geneImgX     = 0;
-            geneImgY     = 0;
+            const wrapper = document.getElementById('geneImgWrapper');
+            const img     = document.getElementById('geneExprImg');
+            if (wrapper && img) {
+                // 自动计算适合容器的初始缩放比例
+                const scaleX = wrapper.clientWidth  / img.naturalWidth;
+                const scaleY = wrapper.clientHeight / img.naturalHeight;
+                geneImgScale = Math.min(scaleX, scaleY) * 0.95;
+            } else {
+                geneImgScale = 1;
+            }
+            geneImgX = 0;
+            geneImgY = 0;
             geneImgApplyTransform();
         }
 
